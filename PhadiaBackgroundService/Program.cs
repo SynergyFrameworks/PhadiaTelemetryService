@@ -125,6 +125,9 @@ public class Program
                // Add file processing service
                services.AddSingleton<FileProcessingService>();
 
+               services.AddSingleton<IFileProcessor, FileProcessor>();
+               services.AddSingleton<Metrics>();
+
            });
 
     private static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()

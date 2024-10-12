@@ -3,22 +3,21 @@ using Microsoft.Extensions.Options;
 using Moq;
 using PhadiaBackgroundService.Abstracts;
 using PhadiaBackgroundService.Infrastructure;
-using PhadiaBackgroundService.Model;
 using System;
 using System.IO;
-using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
 namespace PhadiaBackgroundService.Tests
 {
-    public class FileProcessingServiceTests
+    public class FileProcessingServiceTests : IDisposable
     {
         private readonly Mock<ILogger<FileProcessingService>> _loggerMock;
         private readonly Mock<IOptions<TelemetryOptions>> _optionsMock;
         private readonly Mock<IPhadiaTelemetryHandler> _telemetryHandlerMock;
+        private readonly Mock<IFileProcessor> _fileProcessorMock;
+        private readonly Metrics _metrics;
         private readonly string _tempPath;
 
         public FileProcessingServiceTests()
@@ -26,79 +25,130 @@ namespace PhadiaBackgroundService.Tests
             _loggerMock = new Mock<ILogger<FileProcessingService>>();
             _optionsMock = new Mock<IOptions<TelemetryOptions>>();
             _telemetryHandlerMock = new Mock<IPhadiaTelemetryHandler>();
+            _fileProcessorMock = new Mock<IFileProcessor>();
+            _metrics = new Metrics();
             _tempPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             Directory.CreateDirectory(_tempPath);
             _optionsMock.Setup(o => o.Value).Returns(new TelemetryOptions { DirectoryPath = _tempPath });
+        }
+
+        private FileProcessingService CreateFileProcessingService()
+        {
+            return new FileProcessingService(
+                _loggerMock.Object,
+                _optionsMock.Object,
+                _telemetryHandlerMock.Object,
+                _fileProcessorMock.Object,
+                _metrics);
         }
 
         [Fact]
         public async Task ProcessNewFilesAsync_ProcessesNewFiles()
         {
             // Arrange
-            var service = new FileProcessingService(_loggerMock.Object, _optionsMock.Object, _telemetryHandlerMock.Object);
+            var service = CreateFileProcessingService();
             var testFiles = CreateTestFiles(3);
+            _fileProcessorMock.Setup(fp => fp.ReadLargeFileAsync(It.IsAny<string>())).ReturnsAsync("{}");
 
             // Act
             await service.ProcessNewFilesAsync();
+            await service.WaitForProcessingCompletionAsync(TimeSpan.FromSeconds(10));
 
             // Assert
             _telemetryHandlerMock.Verify(h => h.HandleTelemetryDataAsync(It.IsAny<AllergenTelemetryData>(), It.IsAny<CancellationToken>()), Times.Exactly(3));
             VerifyLoggerCalls(LogLevel.Information, "Processed file", Times.Exactly(3));
             VerifyProcessedFilesLog(testFiles);
+            Assert.Equal(3, _metrics.ProcessedFiles);
 
             // Run again to ensure no files are reprocessed
             await service.ProcessNewFilesAsync();
+            await service.WaitForProcessingCompletionAsync(TimeSpan.FromSeconds(5));
             _telemetryHandlerMock.Verify(h => h.HandleTelemetryDataAsync(It.IsAny<AllergenTelemetryData>(), It.IsAny<CancellationToken>()), Times.Exactly(3));
 
             // Create a new file and verify only it is processed
             var newFile = CreateTestFile("test4.json");
             await service.ProcessNewFilesAsync();
+            await service.WaitForProcessingCompletionAsync(TimeSpan.FromSeconds(5));
             _telemetryHandlerMock.Verify(h => h.HandleTelemetryDataAsync(It.IsAny<AllergenTelemetryData>(), It.IsAny<CancellationToken>()), Times.Exactly(4));
+            Assert.Equal(4, _metrics.ProcessedFiles);
         }
 
         [Fact]
         public async Task ProcessNewFilesAsync_ProcessesXmlFile()
         {
             // Arrange
-            var service = new FileProcessingService(_loggerMock.Object, _optionsMock.Object, _telemetryHandlerMock.Object);
-            var xmlFile = CreateTestFile("test.xml", "<AllergenTelemetryData><AllergenName>Test</AllergenName></AllergenTelemetryData>");
+            var service = CreateFileProcessingService();
+            var xmlContent = "<AllergenTelemetryData><AllergenName>Test</AllergenName></AllergenTelemetryData>";
+            var xmlFile = CreateTestFile("test.xml", xmlContent);
+            _fileProcessorMock.Setup(fp => fp.ReadLargeFileAsync(It.IsAny<string>())).ReturnsAsync(xmlContent);
 
             // Act
             await service.ProcessNewFilesAsync();
+            await service.WaitForProcessingCompletionAsync(TimeSpan.FromSeconds(5));
 
             // Assert
             _telemetryHandlerMock.Verify(h => h.HandleTelemetryDataAsync(It.Is<AllergenTelemetryData>(d => d.AllergenName == "Test"), It.IsAny<CancellationToken>()), Times.Once);
             VerifyLoggerCalls(LogLevel.Information, "Processed file", Times.Once());
+            Assert.Equal(1, _metrics.ProcessedFiles);
         }
 
         [Fact]
         public async Task ProcessNewFilesAsync_ProcessesJsonFile()
         {
             // Arrange
-            var service = new FileProcessingService(_loggerMock.Object, _optionsMock.Object, _telemetryHandlerMock.Object);
-            var jsonFile = CreateTestFile("test.json", "{\"AllergenName\": \"Test\"}");
+            var service = CreateFileProcessingService();
+            var jsonContent = "{\"AllergenName\": \"Test\"}";
+            var jsonFile = CreateTestFile("test.json", jsonContent);
+            _fileProcessorMock.Setup(fp => fp.ReadLargeFileAsync(It.IsAny<string>())).ReturnsAsync(jsonContent);
 
             // Act
             await service.ProcessNewFilesAsync();
+            await service.WaitForProcessingCompletionAsync(TimeSpan.FromSeconds(5));
 
             // Assert
             _telemetryHandlerMock.Verify(h => h.HandleTelemetryDataAsync(It.Is<AllergenTelemetryData>(d => d.AllergenName == "Test"), It.IsAny<CancellationToken>()), Times.Once);
             VerifyLoggerCalls(LogLevel.Information, "Processed file", Times.Once());
+            Assert.Equal(1, _metrics.ProcessedFiles);
         }
 
         [Fact]
         public async Task ProcessNewFilesAsync_HandlesInvalidFileFormat()
         {
             // Arrange
-            var service = new FileProcessingService(_loggerMock.Object, _optionsMock.Object, _telemetryHandlerMock.Object);
-            var invalidFile = CreateTestFile("test.txt", "This is not a valid XML or JSON file");
+            var service = CreateFileProcessingService();
+            var invalidContent = "This is not a valid XML or JSON file";
+            var invalidFile = CreateTestFile("test.txt", invalidContent);
+            _fileProcessorMock.Setup(fp => fp.ReadLargeFileAsync(It.IsAny<string>())).ReturnsAsync(invalidContent);
 
             // Act
             await service.ProcessNewFilesAsync();
+            await service.WaitForProcessingCompletionAsync(TimeSpan.FromSeconds(5));
 
             // Assert
             _telemetryHandlerMock.Verify(h => h.HandleTelemetryDataAsync(It.IsAny<AllergenTelemetryData>(), It.IsAny<CancellationToken>()), Times.Never);
             VerifyLoggerCalls(LogLevel.Error, "Error processing file", Times.Once());
+            Assert.Equal(0, _metrics.ProcessedFiles);
+            Assert.Equal(1, _metrics.FailedFiles);
+        }
+
+        [Fact]
+        public async Task ProcessNewFilesAsync_ProcessesFilesConcurrently()
+        {
+            // Arrange
+            var service = CreateFileProcessingService();
+            var testFiles = CreateTestFiles(10);
+            _fileProcessorMock.Setup(fp => fp.ReadLargeFileAsync(It.IsAny<string>())).ReturnsAsync("{}");
+
+            // Act
+            await service.ProcessNewFilesAsync();
+            await service.WaitForProcessingCompletionAsync(TimeSpan.FromSeconds(15));
+
+            // Assert
+            _telemetryHandlerMock.Verify(h => h.HandleTelemetryDataAsync(It.IsAny<AllergenTelemetryData>(), It.IsAny<CancellationToken>()), Times.Exactly(10));
+            VerifyLoggerCalls(LogLevel.Information, "Processed file", Times.Exactly(10));
+            VerifyProcessedFilesLog(testFiles);
+            Assert.Equal(10, _metrics.ProcessedFiles);
+            Assert.Equal(0, _metrics.FailedFiles);
         }
 
         private string[] CreateTestFiles(int count)
@@ -137,7 +187,12 @@ namespace PhadiaBackgroundService.Tests
             Assert.True(File.Exists(logPath));
             var processedFiles = File.ReadAllLines(logPath);
             Assert.Equal(expectedFiles.Length, processedFiles.Length);
-            Assert.All(expectedFiles, file => Assert.Contains(file, processedFiles));
+            Assert.All(expectedFiles, file => Assert.Contains(processedFiles, line => line.StartsWith(file)));
+        }
+
+        public void Dispose()
+        {
+            Directory.Delete(_tempPath, true);
         }
     }
 }

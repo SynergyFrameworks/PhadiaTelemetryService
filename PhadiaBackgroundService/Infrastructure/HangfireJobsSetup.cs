@@ -26,9 +26,9 @@ namespace PhadiaBackgroundService.Infrastructure
             _logger.LogInformation("Scheduling Hangfire job to run every {Interval} minutes", jobIntervalMinutes);
 
             RecurringJob.AddOrUpdate<FileProcessingService>(
-                "check-new-files",
-                service => service.ProcessNewFilesAsync(),
-                Cron.MinuteInterval(jobIntervalMinutes));
+               "check-new-files",
+               service => service.ProcessNewFilesAsync(),
+               Cron.MinuteInterval(jobIntervalMinutes));
 
             return Task.CompletedTask;
         }
