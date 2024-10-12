@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<AllergenTelemetryData>
+  <AllergenName>Pollen</AllergenName>
+  <CommonAllergens>
+    <string>Birch</string>
+    <string>Oak</string>
+    <string>Ragweed</string>
+  </CommonAllergens>
+  <Region>Europe</Region>
+  <SensitizationPercentage>65.0</SensitizationPercentage>
+  <IsPrimaryAllergen>false</IsPrimaryAllergen>
+  <ExposureRoute>Airborne</ExposureRoute>
+  <RiskOfAsthma>false</RiskOfAsthma>
+  <CanInduceRhinitis>true</CanInduceRhinitis>
+  <CanInduceConjunctivitis>true</CanInduceConjunctivitis>
+  <RiskFactorForAsthma>Moderate</RiskFactorForAsthma>
+  <CanInduceAtopicDermatitis>false</CanInduceAtopicDermatitis>
+  <IsUsedForAllergenImmunotherapy>false</IsUsedForAllergenImmunotherapy>
+  <DiagnosticTests>
+    <string>Pollen Count</string>
+    <string>Nasal Smear</string>
+  </DiagnosticTests>
+  <PediatricPrevalence>
+    <string>50% in rural areas</string>
+    <string>40% in urban areas</string>
+  </PediatricPrevalence>
+  <EnvironmentalDistribution>
+    <string>Outdoor air</string>
+    <string>Seasonal</string>
+  </EnvironmentalDistribution>
+</AllergenTelemetryData>

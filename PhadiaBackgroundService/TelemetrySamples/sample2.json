@@ -1,0 +1,17 @@
+{
+  "AllergenName": "Pollen",
+  "CommonAllergens": [ "Birch", "Oak", "Ragweed" ],
+  "Region": "Europe",
+  "SensitizationPercentage": 65.0,
+  "IsPrimaryAllergen": false,
+  "ExposureRoute": "Airborne",
+  "RiskOfAsthma": false,
+  "CanInduceRhinitis": true,
+  "CanInduceConjunctivitis": true,
+  "RiskFactorForAsthma": "Moderate",
+  "CanInduceAtopicDermatitis": false,
+  "IsUsedForAllergenImmunotherapy": false,
+  "DiagnosticTests": [ "Pollen Count", "Nasal Smear" ],
+  "PediatricPrevalence": [ "50% in rural areas", "40% in urban areas" ],
+  "EnvironmentalDistribution": [ "Outdoor air", "Seasonal" ]
+}

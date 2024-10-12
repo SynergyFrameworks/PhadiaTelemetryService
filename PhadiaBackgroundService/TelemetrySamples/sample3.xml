@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<AllergenTelemetryData>
+  <AllergenName>Cat Dander</AllergenName>
+  <CommonAllergens>
+    <string>Fel d 1</string>
+    <string>Fel d 2</string>
+  </CommonAllergens>
+  <Region>Global</Region>
+  <SensitizationPercentage>80.1</SensitizationPercentage>
+  <IsPrimaryAllergen>true</IsPrimaryAllergen>
+  <ExposureRoute>Contact</ExposureRoute>
+  <RiskOfAsthma>true</RiskOfAsthma>
+  <CanInduceRhinitis>true</CanInduceRhinitis>
+  <CanInduceConjunctivitis>true</CanInduceConjunctivitis>
+  <RiskFactorForAsthma>High</RiskFactorForAsthma>
+  <CanInduceAtopicDermatitis>true</CanInduceAtopicDermatitis>
+  <IsUsedForAllergenImmunotherapy>true</IsUsedForAllergenImmunotherapy>
+  <DiagnosticTests>
+    <string>Skin Prick Test</string>
+    <string>Allergen-Specific IgE</string>
+  </DiagnosticTests>
+  <PediatricPrevalence>
+    <string>45% in children under 10</string>
+    <string>60% in children with pets</string>
+  </PediatricPrevalence>
+  <EnvironmentalDistribution>
+    <string>Indoor air</string>
+    <string>Pet bedding</string>
+  </EnvironmentalDistribution>
+</AllergenTelemetryData>

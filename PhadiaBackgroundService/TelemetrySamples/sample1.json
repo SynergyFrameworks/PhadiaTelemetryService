@@ -1,0 +1,17 @@
+{
+  "AllergenName": "Dust Mite",
+  "CommonAllergens": [ "Dermatophagoides farinae", "Dermatophagoides pteronyssinus" ],
+  "Region": "North America",
+  "SensitizationPercentage": 75.5,
+  "IsPrimaryAllergen": true,
+  "ExposureRoute": "Inhalation",
+  "RiskOfAsthma": true,
+  "CanInduceRhinitis": true,
+  "CanInduceConjunctivitis": true,
+  "RiskFactorForAsthma": "High",
+  "CanInduceAtopicDermatitis": true,
+  "IsUsedForAllergenImmunotherapy": true,
+  "DiagnosticTests": [ "Skin Prick Test", "Specific IgE Blood Test" ],
+  "PediatricPrevalence": [ "30% in children under 12", "20% in adolescents" ],
+  "EnvironmentalDistribution": [ "Household dust", "Bedding" ]
+}

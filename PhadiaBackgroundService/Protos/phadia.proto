@@ -1,0 +1,35 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "PhadiaGrpcService";
+
+package phadia;
+
+service PhadiaGrpcService {
+    rpc SendTelemetry (TelemetryRequest) returns (TelemetryResponse);
+}
+
+message TelemetryRequest {
+    AllergenTelemetryData data = 1;
+}
+
+message TelemetryResponse {
+    bool success = 1;
+}
+
+message AllergenTelemetryData {
+    string AllergenName = 1;
+    repeated string CommonAllergens = 2;
+    string Region = 3;
+    double SensitizationPercentage = 4;
+    bool IsPrimaryAllergen = 5;
+    string ExposureRoute = 6;
+    bool RiskOfAsthma = 7;
+    bool CanInduceRhinitis = 8;
+    bool CanInduceConjunctivitis = 9;
+    string RiskFactorForAsthma = 10;
+    bool CanInduceAtopicDermatitis = 11;
+    bool IsUsedForAllergenImmunotherapy = 12;
+    repeated string DiagnosticTests = 13;
+    repeated string PediatricPrevalence = 14;
+    repeated string EnvironmentalDistribution = 15;
+}

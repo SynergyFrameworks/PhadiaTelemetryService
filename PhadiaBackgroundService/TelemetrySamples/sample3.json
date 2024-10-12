@@ -1,0 +1,17 @@
+{
+  "AllergenName": "Cat Dander",
+  "CommonAllergens": [ "Fel d 1", "Fel d 2" ],
+  "Region": "Global",
+  "SensitizationPercentage": 80.1,
+  "IsPrimaryAllergen": true,
+  "ExposureRoute": "Contact",
+  "RiskOfAsthma": true,
+  "CanInduceRhinitis": true,
+  "CanInduceConjunctivitis": true,
+  "RiskFactorForAsthma": "High",
+  "CanInduceAtopicDermatitis": true,
+  "IsUsedForAllergenImmunotherapy": true,
+  "DiagnosticTests": [ "Skin Prick Test", "Allergen-Specific IgE" ],
+  "PediatricPrevalence": [ "45% in children under 10", "60% in children with pets" ],
+  "EnvironmentalDistribution": [ "Indoor air", "Pet bedding" ]
+}
